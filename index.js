@@ -30,10 +30,13 @@ const cors = require('cors');
 
 const sessionStore = new MySQLStore({}, db);
 const corsOptions = {
-  /*  origin: ['http://localhost:3000/login','http://localhost:3000/session','http://localhost:300','http://localhost:3000/login','https://3cc7-217-211-74-135.ngrok-free.app/users'],*/ // Replace with your React app's origin during development
-  origin:'*',
-    credentials: true,
-  };
+  origin: [
+    'http://localhost:3000',
+    'https://3cc7-217-211-74-135.ngrok-free.app', // Add other allowed origins as needed
+  ],
+  credentials: true,
+};
+
   
   
 
@@ -77,6 +80,7 @@ app.get('/todos', (req, res) => {
     res.json(results);
   });
 });*/
+/*
 app.get('/todos', (req, res) => {
   const userId = req.session.userId;
   const sql = 'SELECT * FROM todos WHERE userId = ?';
@@ -84,7 +88,27 @@ app.get('/todos', (req, res) => {
     if (err) throw err;
     res.json(results);
   });
+});*/
+// Middleware function to check for an active session
+const checkSession = (req, res, next) => {
+  if (!req.session.userId) {
+    // If there is no active session, return a 401 Unauthorized response
+    return res.status(401).json({ message: 'Unauthorized. Please log in to access this resource.' });
+  }
+  // If the session is active, proceed to the next middleware or route handler
+  next();
+};
+
+// Use the checkSession middleware before the /todos route
+app.get('/todos', checkSession, (req, res) => {
+  const userId = req.session.userId;
+  const sql = 'SELECT * FROM todos WHERE userId = ?';
+  db.query(sql, [userId], (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
 });
+
 
 
 //delete route for todos
