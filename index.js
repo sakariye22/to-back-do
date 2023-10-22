@@ -7,6 +7,12 @@ const MySQLStore = require('express-mysql-session')(session);
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
+
+
+
+
+
+
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
@@ -20,11 +26,20 @@ db.connect((err) => {
 });
 
 const app = express();
+const cors = require('cors');
 
 const sessionStore = new MySQLStore({}, db);
+const corsOptions = {
+  /*  origin: ['http://localhost:3000/login','http://localhost:3000/session','http://localhost:300','http://localhost:3000/login','https://3cc7-217-211-74-135.ngrok-free.app/users'],*/ // Replace with your React app's origin during development
+  origin:'*',
+    credentials: true,
+  };
+  
+  
 
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(cors(corsOptions));
 app.use(
   session({
     secret: 'your-secret-key',
@@ -37,7 +52,7 @@ app.use(
     },
   })
 );
-
+//post route for todos
 app.post('/todos', (req, res) => {
   const { title, content } = req.body;
   const userId = req.session.userId;
@@ -52,7 +67,8 @@ app.post('/todos', (req, res) => {
     res.status(201).json({ message: 'Todo created successfully' });
   });
 });
-
+//get route for todos
+/*
 app.get('/todos', (req, res) => {
   const userId = req.session.userId;
   const sql = 'SELECT * FROM todos WHERE userId = ?';
@@ -60,7 +76,72 @@ app.get('/todos', (req, res) => {
     if (err) throw err;
     res.json(results);
   });
+});*/
+app.get('/todos', (req, res) => {
+  const userId = req.session.userId;
+  const sql = 'SELECT * FROM todos WHERE userId = ?';
+  db.query(sql, [userId], (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
 });
+
+
+//delete route for todos
+app.delete('/todos/:id', (req, res) => {
+    const userId = req.session.userId;
+    const todoId = req.params.id;
+  
+    if (userId == null) {
+      return res.status(401).json({ message: 'Unauthorized. Please log in to delete a todo.' });
+    }
+  
+    const deleteSql = 'DELETE FROM todos WHERE id = ? AND userId = ?';
+    db.query(deleteSql, [todoId, userId], (err, result) => {
+      if (err) throw err;
+      if (result.affectedRows > 0) {
+        res.status(200).json({ message: 'Todo deleted successfully' });
+      } else {
+        res.status(404).json({ message: 'Todo not found or you do not have permission to delete it' });
+      }
+    });
+  });
+
+  app.patch('/todos/:id', (req, res) => {
+    const userId = req.session.userId;
+    const todoId = req.params.id;
+    const { title, content } = req.body;
+  
+    if (userId == null) {
+      return res.status(401).json({ message: 'Unauthorized. Please log in to update a todo.' });
+    }
+  
+    const updateSql = 'UPDATE todos SET title = ?, content = ? WHERE id = ? AND userId = ?';
+    db.query(updateSql, [title, content, todoId, userId], (err, result) => {
+      if (err) throw err;
+      if (result.affectedRows > 0) {
+        res.status(200).json({ message: 'Todo updated successfully' });
+      } else {
+        res.status(404).json({ message: 'Todo not found or you do not have permission to update it' });
+      }
+    });
+  });
+  
+
+
+app.get('/me',(req,res)=>{
+    res.json('hello');
+});
+app.get('/check-session', (req, res) => {
+  if (req.session.userId) {
+    // Session exists, return user's ID
+    res.status(200).json({ userId: req.session.userId });
+  } else {
+    // No session or not logged in
+    res.status(401).json({ message: 'No active session' });
+  }
+});
+
 
 app.post('/users', (req, res) => {
   const { username, email, password } = req.body;
@@ -78,6 +159,14 @@ app.post('/users', (req, res) => {
     });
   });
 });
+
+
+
+  
+
+
+
+
 
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
