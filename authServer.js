@@ -52,7 +52,7 @@ app.use(express.json());
 const logAudit = (action, userId, ipAddress) => {
   const timestamp = new Date().toISOString();
   const log = `${timestamp} - User ${userId} from IP ${ipAddress}: ${action}`;
-  console.log(log); // För närvarande loggas till konsolen för enkelhets skull
+  console.log(log); 
 };
 
 
