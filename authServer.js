@@ -49,6 +49,12 @@ app.use(cors(corsOptions));
 app.use(express.json());
 //app.options('*', cors(corsOptions));
 
+const logAudit = (action, userId, ipAddress) => {
+  const timestamp = new Date().toISOString();
+  const log = `${timestamp} - User ${userId} from IP ${ipAddress}: ${action}`;
+  console.log(log); // För närvarande loggas till konsolen för enkelhets skull
+};
+
 
 // User registration route
 app.post('/users', (req, res) => {
@@ -61,6 +67,7 @@ app.post('/users', (req, res) => {
     const sql = 'INSERT INTO users SET ?';
     db.query(sql, user, (err, result) => {
       if (err) throw err;
+      logAudit(`User with username ${email} created`, req.session.userId);
       res.status(201).json({
         message: 'User created successfully',
       });
