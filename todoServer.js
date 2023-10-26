@@ -11,7 +11,7 @@ const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'todo1',
+  database: 'todo2',
 });
 
 db.connect((err) => {
@@ -65,12 +65,6 @@ app.get('/todos', checkSession, (req, res) => {
   });
 });
 
-// Define your to-do related routes here
-
-app.listen(4001, () => {
-  console.log('To-Do server listening on port 4001');
-});
-
 
 app.get('/check-session', (req, res) => {
   if (req.session.userId) {
@@ -81,6 +75,11 @@ app.get('/check-session', (req, res) => {
     res.status(401).json({ message: 'No active session' });
   }
 });
+
+// Define your to-do related routes here
+
+
+
 
 app.post('/todos', (req, res) => {
   const { title, content } = req.body;
@@ -136,4 +135,10 @@ app.patch('/todos/:id', (req, res) => {
       res.status(404).json({ message: 'Todo not found or you do not have permission to update it' });
     }
   });
+});
+
+
+
+app.listen(4001, () => {
+  console.log('To-Do server listening on port 4001');
 });

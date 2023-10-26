@@ -1,5 +1,7 @@
 // authServer.js - Server 1 for Authentication and User Routes
 const express = require('express');
+
+const app = express();
 const mysql = require('mysql');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
@@ -11,7 +13,7 @@ const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'todo1',
+  database: 'todo2',
 });
 
 db.connect((err) => {
@@ -19,7 +21,6 @@ db.connect((err) => {
   console.log('Connected to the database!');
 });
 
-const app = express();
 
 const sessionStore = new MySQLStore({}, db);
 
@@ -36,8 +37,18 @@ app.use(
     },
   })
 );
+const cors = require('cors');
+
+const corsOptions = {
+  origin: 'http://localhost:3000', // Adjust to your client's origin
+  credentials: true, // Allow credentials (cookies)
+};
+app.use(cors(corsOptions));
+
 
 app.use(express.json());
+//app.options('*', cors(corsOptions));
+
 
 // User registration route
 app.post('/users', (req, res) => {
