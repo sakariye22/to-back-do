@@ -4,8 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon authServer.js",
+    "test": "nodemon todoServer.js"
+
+    
   },
+
   "keywords": [],
   "author": "",
   "license": "ISC",
