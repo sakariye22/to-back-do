@@ -5,13 +5,16 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const cookieParser = require('cookie-parser');
+const morgan = require('morgan');
+const fs = require('fs');
 require('dotenv').config();
+const accessLogStream = fs.createWriteStream('todo-logs.json', { flags: 'a' });
 
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'todo1',
+  database: 'todo2',
 });
 
 db.connect((err) => {
@@ -47,6 +50,8 @@ app.use(
   })
 );
 
+app.use(morgan('combined', { stream: accessLogStream }));
+
 // Middleware function to check for an active session
 const checkSession = (req, res, next) => {
   if (!req.session.userId) {
@@ -60,7 +65,10 @@ app.get('/todos', checkSession, (req, res) => {
   const userId = req.session.userId;
   const sql = 'SELECT * FROM todos WHERE userId = ?';
   db.query(sql, [userId], (err, results) => {
-    if (err) throw err;
+    if (err) {
+      errorLogger.error({ message: 'Error while fetching todos', error: err });
+      throw err;
+    }
     res.json(results);
   });
 });
@@ -76,7 +84,6 @@ app.get('/check-session', (req, res) => {
   }
 });
 
-// Define your to-do related routes here
 
 
 
