@@ -1,6 +1,6 @@
 // authServer.js - Server 1 for Authentication and User Routes
 const express = require('express');
-
+const jwt = require('jsonwebtoken');
 const app = express();
 const mysql = require('mysql');
 const bcrypt = require('bcrypt');
@@ -19,7 +19,7 @@ const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'todo2',
+  database: 'todo1',
 });
 
 db.connect((err) => {
@@ -117,6 +117,7 @@ app.post('/users', (req, res) => {
 });
 
 
+
 app.post('/login', /*bruteforce.prevent,*/ (req, res) => {
   const { email, password } = req.body;
   const checkUserSql = 'SELECT * FROM users WHERE email = ?';
@@ -137,13 +138,22 @@ app.post('/login', /*bruteforce.prevent,*/ (req, res) => {
       }
       req.session.userId = user.id;
       logger.info({ message: `User with email ${email} logged in`, userId: user.id });
+
+      // Här genererar du JWT-token
+      const token = jwt.sign({ email }, 'hemlig-nyckel', { expiresIn: '1h' });
+
+      // Skicka JWT-token som en del av svarssnacket
       res.status(200).json({
         message: 'Authentication successful',
         userId: user.id,
+        token, // Skicka JWT-token till klienten
       });
     });
   });
 });
+
+
+
 
 
 app.post('/logout', (req, res) => {

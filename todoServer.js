@@ -8,13 +8,15 @@ const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const fs = require('fs');
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
+
 const accessLogStream = fs.createWriteStream('todo-logs.json', { flags: 'a' });
 
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'todo2',
+  database: 'todo1',
 });
 
 db.connect((err) => {
@@ -60,8 +62,30 @@ const checkSession = (req, res, next) => {
   next();
 };
 
+const secretKey = 'hemlig-nyckel'; // Ska matcha nyckeln i din authserver
+
+const requireJWT = (req, res, next) => {
+  const token = req.headers.authorization; // Exempel: "Bearer din-jwt-token"
+  
+  if (!token) {
+    return res.status(401).json({ message: 'Ingen token tillhandahållen' });
+  }
+
+  jwt.verify(token, secretKey, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: 'Ogiltig token' });
+    }
+
+    // Token är giltig, fortsätt med ruttens hantering
+    next();
+  });
+};
+
+
+
+
 // Get to-do items for a user
-app.get('/todos', checkSession, (req, res) => {
+app.get('/todos', requireJWT, (req, res) => {
   const userId = req.session.userId;
   const sql = 'SELECT * FROM todos WHERE userId = ?';
   db.query(sql, [userId], (err, results) => {
@@ -88,7 +112,7 @@ app.get('/check-session', (req, res) => {
 
 
 
-app.post('/todos', (req, res) => {
+app.post('/todos', requireJWT,(req, res) => {
   const { title, content } = req.body;
   const userId = req.session.userId;
   if (userId == null) {

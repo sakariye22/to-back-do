@@ -84,3 +84,31 @@
 {"level":"info","message":"User with email yahya@email.com logged in","userId":1}
 {"level":"info","message":"User with email yahya@email.com logged in","userId":1}
 {"level":"info","message":"User with email yahya@email.com logged in","userId":1}
+{"level":"info","message":"User with username kam@mail.com created"}
+{"level":"info","message":"User with email kam@mail.com logged in","userId":3}
+{"level":"info","message":"User with username user@mail.com created"}
+{"level":"info","message":"User with email user@mail.com logged in","userId":4}
+{"level":"info","message":"User with email user@mail.com logged in","userId":4}
+{"level":"info","message":"User with email user@mail.com logged in","userId":4}
+{"level":"info","message":"User with email kemo@mail.com logged in","userId":2}
+{"level":"info","message":"User with email kam@mail.com logged in","userId":3}
+{"level":"info","message":"User with username ny@mail.com created"}
+{"level":"info","message":"User with email ny@mail.com logged in","userId":5}
+{"level":"info","message":"User with username kemo@mail.com created"}
+{"level":"info","message":"User with email kemo@mail.com logged in","userId":2}
+{"level":"info","message":"User with email kemo@mail.com logged in","userId":2}
+{"level":"info","message":"User with username user1@mail.com created"}
+{"level":"info","message":"User with email user1@mail.com logged in","userId":7}
+{"level":"info","message":"User with email user1@mail.com logged in","userId":7}
+{"level":"info","message":"User with email user1@mail.com logged in","userId":7}
+{"level":"info","message":"User with username user2@mail.com created"}
+{"level":"info","message":"User with email user1@mail.com logged in","userId":7}
+{"level":"info","message":"User with email user2@mail.com logged in","userId":8}
+{"level":"info","message":"User with email user2@mail.com logged in","userId":8}
+{"level":"info","message":"User with username user3@mail.com created"}
+{"level":"info","message":"User with email user3@mail.com logged in","userId":9}
+{"level":"info","message":"User with username user4@mail.com created"}
+{"level":"info","message":"User with email user4@mail.com logged in","userId":10}
+{"level":"info","message":"User with email user4@mail.com logged in","userId":10}
+{"level":"info","message":"User with email user4@mail.com logged in","userId":10}
+{"level":"info","message":"User with email user4@mail.com logged in","userId":10}
