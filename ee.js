@@ -212,7 +212,83 @@ app.post('/testtoken', (req, res) => {
     });
   });
   
+  app.delete('/delete/:id', (req, res) => {
+    const token = req.headers['authorization'];
+  
+    if (!token) {
+      return res.status(401).json({ message: 'Token not provided in the Authorization header' });
+    }
+  
+    const tokenWithoutBearer = token.replace('Bearer ', '');
+  
+    jwt.verify(tokenWithoutBearer, secretKey, (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ message: 'Token is not valid' });
+      }
+  
+      const { userId } = decoded;
+      const todoId = req.params.id;
+  
+      db.query('SELECT * FROM todos WHERE id = ? AND user = ?', [todoId, userId], (err, results) => {
+        if (err) {
+          return res.status(500).json({ message: 'Error deleting todo' });
+        }
+  
+        if (results.length === 0) {
+          return res.status(404).json({ message: 'Todo not found' });
+        }
+  
+       
+        db.query('DELETE FROM todos WHERE id = ?', [todoId], (err, result) => {
+          if (err) {
+            return res.status(500).json({ message: 'Error deleting todo' });
+          }
+  
+          res.json({ message: 'Todo deleted successfully' });
+        });
+      });
+    });
+  });
 
+  app.patch('/edit/:id', (req, res) => {
+    const token = req.headers['authorization'];
+  
+    if (!token) {
+      return res.status(401).json({ message: 'Token not provided in the Authorization header' });
+    }
+  
+    const tokenWithoutBearer = token.replace('Bearer ', '');
+
+    jwt.verify(tokenWithoutBearer, secretKey, (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ message: 'Token is not valid' });
+      }
+
+      const { userId } = decoded;
+      const todoId = req.params.id;
+      const updatedTask = req.body.task;
+  
+      db.query('SELECT * FROM todos WHERE id = ? AND user = ?', [todoId, userId], (err, results) => {
+        if (err) {
+          return res.status(500).json({ message: 'Error updating todo' });
+        }
+  
+        if (results.length === 0) {
+          return res.status(404).json({ message: 'Todo not found' });
+        }
+  
+        db.query('UPDATE todos SET task = ? WHERE id = ?', [updatedTask, todoId], (err, result) => {
+          if (err) {
+            return res.status(500).json({ message: 'Error updating todo' });
+          }
+  
+          res.json({ message: 'Todo updated successfully' });
+        });
+      });
+    });
+  });
+  
+  
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
