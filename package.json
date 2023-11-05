@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon authServer.js",
-    "test": "nodemon todoServer.js"
+    "test": "nodemon todoServer.js",
+    "dev": "nodemon ee.js",
+    "run": "nodemon e.js"
+
   },
   "keywords": [],
   "author": "",
