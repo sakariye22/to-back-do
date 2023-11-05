@@ -78,6 +78,29 @@ app.post('/testtoken', (req, res) => {
   });
   
 
+  app.get('/protected', (req, res) => {
+    const token = req.headers['authorization'];
+  
+    if (!token) {
+      return res.status(401).json({ message: 'Token not provided in the Authorization header' });
+    }
+  
+    const tokenWithoutBearer = token.replace('Bearer ', '');
+  
+    jwt.verify(tokenWithoutBearer, secretKey, (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ message: 'Token is not valid' });
+      }
+  
+      res.json({ message: 'Token is valid', decoded });
+    });
+  });
+
+
+
+
+
+
 
   app.post('/register', (req, res) => {
     const { username, email, password } = req.body;
@@ -162,13 +185,14 @@ app.post('/testtoken', (req, res) => {
   });
   
 
-  app.get('/protected', (req, res) => {
+
+
+  app.get('/get-todos', (req, res) => {
     const token = req.headers['authorization'];
   
     if (!token) {
       return res.status(401).json({ message: 'Token not provided in the Authorization header' });
     }
-  
     const tokenWithoutBearer = token.replace('Bearer ', '');
   
     jwt.verify(tokenWithoutBearer, secretKey, (err, decoded) => {
@@ -176,9 +200,18 @@ app.post('/testtoken', (req, res) => {
         return res.status(401).json({ message: 'Token is not valid' });
       }
   
-      res.json({ message: 'Token is valid', decoded });
+      const { userId } = decoded;
+  
+      db.query('SELECT * FROM todos WHERE user = ?', [userId], (err, results) => {
+        if (err) {
+          return res.status(500).json({ message: 'Error fetching todos' });
+        }
+  
+        res.json({ todos: results });
+      });
     });
   });
+  
 
 
 app.listen(port, () => {
