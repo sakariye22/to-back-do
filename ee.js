@@ -36,68 +36,68 @@ const secretKey = 'yourSecretKey';
 
 
 
+app.post('/create-todo', (req, res) => {
+  const token = req.headers['authorization'];
 
-  app.post('/create-todo', (req, res) => {
-    
-    const token = req.headers['authorization'];
-  
-    if (!token) {
-      return res.status(401).json({ message: 'Token not provided in the Authorization header' });
+  if (!token) {
+    return res.status(401).json({ message: 'Token not provided in the Authorization header' });
+  }
+
+  const tokenWithoutBearer = token.replace('Bearer ', '');
+
+  jwt.verify(tokenWithoutBearer, secretKey, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: 'Token is not valid' });
     }
-  
 
-    const tokenWithoutBearer = token.replace('Bearer ', '');
-  
- 
-    jwt.verify(tokenWithoutBearer, secretKey, (err, decoded) => {
+    const { userId, githubId } = decoded;
+    const { task } = req.body;
+
+    const todo = { user: userId, githubId, task }; // Store both local and GitHub user IDs
+
+    db.query('INSERT INTO todos (user, githubId, task) VALUES (?, ?, ?)', [todo.user, todo.githubId, todo.task], (err, result) => {
       if (err) {
-        return res.status(401).json({ message: 'Token is not valid' });
+        return res.status(500).json({ message: 'Error creating todo' });
       }
-  
-      const { userId } = decoded;
-      const { task } = req.body;
-  
-    
-      const todo = { user: userId, task };
-  
-      db.query('INSERT INTO todos (user, task) VALUES (?, ?)', [todo.user, todo.task], (err, result) => {
-        if (err) {
-          return res.status(500).json({ message: 'Error creating todo' });
-        }
-  
-    
-        res.status(201).json({ message: 'Todo created successfully' });
-      });
+
+      res.status(201).json({ message: 'Todo created successfully' });
     });
   });
+});
+
   
 
 
 
-  app.get('/get-todos', (req, res) => {
-    const token = req.headers['authorization'];
-  
-    if (!token) {
-      return res.status(401).json({ message: 'Token not provided in the Authorization header' });
+app.get('/get-todos', (req, res) => {
+  const token = req.headers['authorization'];
+
+  if (!token) {
+    return res.status(401).json({ message: 'Token not provided in the Authorization header' });
+  }
+
+  const tokenWithoutBearer = token.replace('Bearer ', '');
+
+  jwt.verify(tokenWithoutBearer, secretKey, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: 'Token is not valid' });
     }
-    const tokenWithoutBearer = token.replace('Bearer ', '');
-  
-    jwt.verify(tokenWithoutBearer, secretKey, (err, decoded) => {
+
+    const { userId, githubId } = decoded;
+
+    const identifier = userId ? 'user' : 'githubId';
+    const query = `SELECT * FROM todos WHERE ${identifier} = ?`;
+
+    db.query(query, [userId || githubId], (err, results) => {
       if (err) {
-        return res.status(401).json({ message: 'Token is not valid' });
+        return res.status(500).json({ message: 'Error fetching todos' });
       }
-  
-      const { userId } = decoded;
-  
-      db.query('SELECT * FROM todos WHERE user = ?', [userId], (err, results) => {
-        if (err) {
-          return res.status(500).json({ message: 'Error fetching todos' });
-        }
-  
-        res.json({ todos: results });
-      });
+
+      res.json({ todos: results });
     });
   });
+});
+
   
   app.delete('/delete/:id', (req, res) => {
     const token = req.headers['authorization'];
